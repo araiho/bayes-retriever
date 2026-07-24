@@ -1,0 +1,24 @@
+{
+  "name": "Maisy",
+  "temperament": "xenophobic",
+  "median_found_mi": 0.18,
+  "chased": false,
+  "lost_since": "2026-07-21T12:00:00-04:00",
+  "busy_trails": ["Forbidden Drive"],
+  "last_seen": {
+    "lat": 40.047139, "lon": -75.207884, "bearing_deg": 230,
+    "note": "Confirmed SIGHTING Tue 2026-07-21 ~midday (CalTopo 'Actual last seen', added 7/24): seen running 230 deg true. Supersedes Sunday cul-de-sac escape point (40.045694,-75.209849, bolted 270 after car chase). Time assumed midday; refine if owner knows the hour."
+  },
+  "search_log": {
+    "import": "caltopo:F0M58FH",
+    "default_pod": 0.4,
+    "default_radius_m": 60
+  },
+  "searched": [
+    {
+      "lat": 40.045694, "lon": -75.209849,
+      "pod": 0.55, "radius_m": 90,
+      "note": "cul-de-sac: owner scent sessions + neighbors + cameras + thermal sensor (self-monitoring — send crews elsewhere)"
+    }
+  ]
+}

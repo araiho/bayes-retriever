@@ -1,0 +1,102 @@
+# Auto-update loop: every ~30 min, pull the live CalTopo map; if a searcher
+# added/changed anything, rerun the model and republish the site to Pages.
+# To switch to a new case: change the CASE line below (see README).
+name: update-map
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even if the CalTopo map is unchanged"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+
+env:
+  CASE: cases/maisy.json
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Check whether the CalTopo map changed
+        id: check
+        run: |
+          SLUG=$(basename "$CASE" .json)
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
+          FP=$(python3 caltopo_live.py --case "$CASE" --fingerprint)
+          DEPLOYED=$(curl -sf "$PAGES_URL/$SLUG/status.json" \
+            | python3 -c "import sys,json;print(json.load(sys.stdin).get('fingerprint',''))" \
+            2>/dev/null || echo "none")
+          echo "fresh=$FP deployed=$DEPLOYED"
+          if [ "$FP" = "$DEPLOYED" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "No searcher activity since last deploy - skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # DEM/OSM downloads are cached; filenames carry the coordinate, so a
+      # moved last-seen point refetches automatically (hashFiles busts the key).
+      - uses: actions/cache@v4
+        if: steps.check.outputs.changed == 'true'
+        with:
+          path: data
+          key: geodata-${{ steps.check.outputs.slug }}-${{ hashFiles('cases/**') }}
+          restore-keys: |
+            geodata-${{ steps.check.outputs.slug }}-
+
+      - name: Run pipeline
+        if: steps.check.outputs.changed == 'true'
+        run: python3 run.py "$CASE"
+
+      - name: Write zones/markers back to the CalTopo map (optional)
+        if: steps.check.outputs.changed == 'true' && vars.CALTOPO_WRITE == '1'
+        env:
+          CALTOPO_CREDENTIAL_ID: ${{ secrets.CALTOPO_CREDENTIAL_ID }}
+          CALTOPO_KEY: ${{ secrets.CALTOPO_KEY }}
+        run: |
+          MAP_ID=$(python3 -c "import caltopo_live; print(caltopo_live.map_id_from_case('$CASE'))")
+          python3 caltopo_write.py "$MAP_ID" "output/${{ steps.check.outputs.slug }}/caltopo_import.json"
+
+      # Best-effort auto-enable of Pages on first run; if it can't (token
+      # scope), enable once by hand: Settings > Pages > Source: GitHub Actions.
+      - uses: actions/configure-pages@v5
+        if: steps.check.outputs.changed == 'true'
+        continue-on-error: true
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.check.outputs.changed == 'true'
+        with:
+          path: output
+
+      - uses: actions/deploy-pages@v4
+        if: steps.check.outputs.changed == 'true'
+        id: deploy

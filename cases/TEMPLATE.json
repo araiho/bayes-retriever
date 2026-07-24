@@ -1,0 +1,18 @@
+{
+  "name": "DogName",
+  "temperament": "xenophobic",
+  "median_found_mi": 0.18,
+  "chased": false,
+  "lost_since": "2026-01-01T09:00:00-05:00",
+  "busy_trails": [],
+  "last_seen": {
+    "lat": 40.000000, "lon": -75.000000, "bearing_deg": null,
+    "note": "who saw the dog where/when; keep this updated as sightings are confirmed"
+  },
+  "search_log": {
+    "import": "caltopo:YOURMAPID",
+    "default_pod": 0.4,
+    "default_radius_m": 60
+  },
+  "searched": []
+}
