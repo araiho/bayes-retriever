@@ -9,6 +9,10 @@
     "lat": 40.047139, "lon": -75.207884, "bearing_deg": 347,
     "note": "CORRECTED TIMELINE (owner, 7/25): lost MONDAY 2026-07-20 from Mt Pleasant Ave (40.052174,-75.196180, CalTopo 'original lost from location'); tracked SW to the Allen Lane cul-de-sac, seen there ~10:00; seen again HERE ~13:00 same day. Construction workers tried to catch her and she bolted 347 deg NNW down toward Livezey Lane / the creek (CalTopo untitled line from this point) — NOT back into the woods SW. Supersedes the Tuesday-midday/230-deg interpretation."
   },
+  "home": {
+    "lat": 40.0645, "lon": -75.1975,
+    "note": "approximate home neighborhood, intentionally jittered ~400m for privacy — lost by a dog sitter elsewhere, not from home; home is NE of the last sighting, up the Cresheim Creek corridor"
+  },
   "search_log": {
     "import": "caltopo:F0M58FH",
     "default_pod": 0.4,

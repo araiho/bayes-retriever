@@ -15,6 +15,7 @@ the docstring at the top of [`casefile.py`](../casefile.py).
 | `chased` | `true` if the dog bolted in a panic (chased, fireworks): sharpens and stretches the flight-direction cone. |
 | `lost_since` | ISO datetime (with UTC offset) of the escape **or the latest confirmed sighting**. Drives the diffusion clock and the settled-phase behavior switch. |
 | `busy_trails` | OSM way names (e.g. `"Forbidden Drive"`) with heavy people/dog/bike traffic — treated as people-pressure, not habitat. |
+| `home` | Optional `{lat, lon}` of the dog's home (useful when lost elsewhere, e.g. by a sitter). Adds a weak homeward pull — brightens ground toward home without masking the far side. |
 | `last_seen` | `{lat, lon, bearing_deg, note}`. Explicit values override anything parsed from the map. `bearing_deg` = compass direction the dog was moving (0 = north), `null` if unknown. |
 | `search_log.import` | `caltopo:<MAPID>` for a live shared CalTopo map (preferred), or a path to a GeoJSON export. |
 | `search_log.default_pod` | Probability a searcher would have detected the dog if present (default 0.4). |

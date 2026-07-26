@@ -150,6 +150,20 @@ def _bearing_stretch(ctx):
     return 1 + (config.CHASED_RING_STRETCH - 1) * ahead
 
 
+def home_pull(ctx):
+    """Weak homeward attractor: tilt probability toward the dog's home so the
+    corridor leading there brightens without dimming the hot zone (floor keeps
+    every direction searchable). Home usually lies OUTSIDE the raster, so the
+    gradient is anchored to the nearest-to-home cell (that edge gets 1.0)."""
+    rc = ctx.get("home_rc")
+    if rc is None:
+        return np.ones_like(ctx["dem"])
+    rows, cols = np.indices(ctx["dem"].shape)
+    d = np.hypot(rows - rc[0], cols - rc[1]) * ctx["res"]
+    return config.HOME_PULL_FLOOR + (1 - config.HOME_PULL_FLOOR) * np.exp(
+        -(d - d.min()) / config.HOME_PULL_DECAY_M)
+
+
 def prior(ctx):
     """Reachability from the last-seen point under the movement model: accumulate
     least-cost 'travel effort' outward, then decay EXPONENTIALLY. Exponential (not
@@ -157,15 +171,16 @@ def prior(ctx):
     dims reachability by a constant multiplicative factor (a smooth step), instead
     of the Gaussian-of-cum² cliff that snapped reach to 0 and drew hard-edged
     wedges along every road. Corridors stretch the envelope; barriers dim it.
-    The flight-bearing cone and (for a chased bolt) the along-bearing stretch of
-    the dispersion ring are folded in here so every consumer of the prior —
-    static POA and diffusion snapshots alike — sees the same directional field."""
+    The flight-bearing cone, (for a chased bolt) the along-bearing stretch of
+    the dispersion ring, and the weak home anchor are folded in here so every
+    consumer of the prior — static POA and diffusion snapshots alike — sees the
+    same directional field."""
     mcp = MCP_Geometric(movement_cost(ctx), sampling=(ctx["res"], ctx["res"]))
     cum, _ = mcp.find_costs([ctx["center_rc"]])
     finite = np.isfinite(cum)
     cum = np.where(finite, cum, cum[finite].max())
     return np.exp(-cum / (config.PRIOR_DECAY_M * _bearing_stretch(ctx))) \
-        * direction_weight(ctx)
+        * direction_weight(ctx) * home_pull(ctx)
 
 
 def downhill(ctx):

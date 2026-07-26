@@ -103,8 +103,8 @@ def _lost_since_ms(iso):
 def load_case(path):
     """Resolve a case JSON (+ imported map export or live CalTopo map) into one
     flat dict: name, slug, temperament, ring50_m, chased,
-    last_seen{lat,lon,bearing_deg}, searched[{lat,lon,pod,radius_m,t_ms,note}],
-    sightings, map_id, fingerprint."""
+    last_seen{lat,lon,bearing_deg}, home{lat,lon},
+    searched[{lat,lon,pod,radius_m,t_ms,note}], sightings, map_id, fingerprint."""
     with open(os.path.expanduser(path)) as f:
         case = json.load(f)
 
@@ -171,6 +171,7 @@ def load_case(path):
         "ring50_m": ring50_m,
         "chased": bool(case.get("chased")),
         "last_seen": last_seen,
+        "home": case.get("home"),
         "searched": searched,
         "sightings": sightings,
         "map_id": map_id,

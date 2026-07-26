@@ -9,6 +9,10 @@
     "lat": 40.000000, "lon": -75.000000, "bearing_deg": null,
     "note": "who saw the dog where/when; keep this updated as sightings are confirmed"
   },
+  "home": {
+    "lat": null, "lon": null,
+    "note": "the dog's home; adds a weak homeward pull (omit or null to disable)"
+  },
   "search_log": {
     "import": "caltopo:YOURMAPID",
     "default_pod": 0.4,

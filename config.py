@@ -119,6 +119,15 @@ FLIGHT_FLOOR = 0.35
 FLIGHT_NEAR_FADE_M = 75      # bearing says nothing about the immediate vicinity
 CHASED_RING_STRETCH = 1.35   # along-bearing dispersion stretch for a bolt
 
+# --- Home anchor (case "home": {lat, lon}) ---
+# Dogs lost away from home sometimes work back along familiar ground (homing
+# is documented within a few miles), so cells nearer home get a mild boost:
+#   w = FLOOR + (1-FLOOR) * exp(-(d_home - d_home_min) / DECAY)
+# Deliberately WEAK — a settled shy dog anchors on food/water/cover first —
+# and floored so the far side stays searchable (de-prioritize, never mask).
+HOME_PULL_FLOOR = 0.6
+HOME_PULL_DECAY_M = 1500
+
 # --- Search-effort discounting (Bayesian update for effort already spent) ---
 # Koopman search theory: after a search with detection probability POD over an
 # area, the posterior there is prior * (1 - POD). Each logged visit removes a

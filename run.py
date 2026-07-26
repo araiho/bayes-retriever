@@ -93,9 +93,17 @@ def main(case):
     for s in case.get("searched", []):
         r, c = _latlon_to_rc(s["lat"], s["lon"], profile)
         searched.append(dict(s, row=r, col=c))
+    home = case.get("home") or {}
+    home_rc = None
+    if home.get("lat") is not None:
+        home_rc = _latlon_to_rc(home["lat"], home["lon"], profile)
+        d_home = np.hypot((home_rc[0] - row0), (home_rc[1] - col0)) * config.RESOLUTION_M
+        print("      home anchor %.0f m from last seen (weak pull, floor %.2f)"
+              % (d_home, config.HOME_PULL_FLOOR))
     ctx = {"dem": dem, "masks": masks, "center_rc": (row0, col0),
            "res": config.RESOLUTION_M, "bearing_deg": bearing,
-           "chased": case.get("chased"), "searched": searched}
+           "chased": case.get("chased"), "searched": searched,
+           "home_rc": home_rc}
     base, stack = scoring.habitat_base(ctx)
     prior = layers.prior(ctx)            # includes flight-bearing cone/stretch
     stack["prior"] = prior
@@ -111,7 +119,8 @@ def main(case):
     print("[4/6] Diffusing probable zone over time (%s h)..."
           % ",".join(str(h) for h in config.DIFFUSION_HOURS))
     diff_probs, dx = diffusion.diffuse(ctx, config.DIFFUSION_HOURS)
-    dirw = layers.direction_weight(ctx)  # diffusion solve has no advection term;
+    dirw = layers.direction_weight(ctx) * layers.home_pull(ctx)
+    # diffusion solve has no advection term; cone + home pull applied here
     time_priority = {h: scoring.combine_display(base, diff_probs[h] * dirw)
                      for h in diff_probs}
     for h in config.DIFFUSION_HOURS:
