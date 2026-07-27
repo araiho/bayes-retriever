@@ -94,6 +94,8 @@ def search_discount(ctx, now_ms=None):
     m = np.ones_like(ctx["dem"])
     H, W = m.shape
     for s in ctx.get("searched", []):
+        if s.get("stale"):     # visit predates the last sighting
+            continue
         r, c = s["row"], s["col"]
         if not (0 <= r < H and 0 <= c < W):
             continue

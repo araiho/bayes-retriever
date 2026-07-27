@@ -2,12 +2,12 @@
   "name": "Maisy",
   "temperament": "xenophobic",
   "median_found_mi": 0.18,
-  "chased": true,
-  "lost_since": "2026-07-20T13:00:00-04:00",
+  "chased": false,
+  "lost_since": "2026-07-26T15:00:00-04:00",
   "busy_trails": ["Forbidden Drive"],
   "last_seen": {
-    "lat": 40.047139, "lon": -75.207884, "bearing_deg": 347,
-    "note": "CORRECTED TIMELINE (owner, 7/25): lost MONDAY 2026-07-20 from Mt Pleasant Ave (40.052174,-75.196180, CalTopo 'original lost from location'); tracked SW to the Allen Lane cul-de-sac, seen there ~10:00; seen again HERE ~13:00 same day. Construction workers tried to catch her and she bolted 347 deg NNW down toward Livezey Lane / the creek (CalTopo untitled line from this point) — NOT back into the woods SW. Supersedes the Tuesday-midday/230-deg interpretation."
+    "lat": 40.0632616, "lon": -75.2018793,
+    "note": "CONFIRMED SIGHTING Sunday 2026-07-26 afternoon (time assumed ~15:00 — refine if known; CalTopo marker 'Sighting Sunday afternoon'). ~1.9 km NE of the Mon 7/20 gorge sighting, up the Cresheim Creek corridor toward home — matches the predicted homing drift. No chase and no flight direction reported at this sighting. Supersedes the 7/20 13:00 point/347-deg bolt."
   },
   "home": {
     "lat": 40.0645, "lon": -75.1975,

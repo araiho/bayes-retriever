@@ -63,9 +63,12 @@ def _hotspot_rows(hotspots):
 def _log_rows(searched):
     rows = []
     for s in sorted(searched, key=lambda s: -(s.get("t_ms") or 0)):
+        note = html.escape(s.get("note", "searched"))
+        if s.get("stale"):
+            note += " <i>(before latest sighting &mdash; not counted)</i>"
         rows.append(
             "<tr><td>%s</td><td>%s</td><td>%s</td><td>%.0f%%</td><td>%.0f m</td></tr>"
-            % (_fmt_t(s.get("t_ms")), html.escape(s.get("note", "searched")),
+            % (_fmt_t(s.get("t_ms")), note,
                html.escape(s.get("creator") or "&mdash;", quote=False),
                100 * s["pod"], s["radius_m"]))
     return "\n".join(rows)

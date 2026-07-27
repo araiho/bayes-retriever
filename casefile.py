@@ -84,7 +84,8 @@ def parse_features(features):
                                             or props.get("-created-by") or ""})
         elif geom.get("type") == "LineString" and _LAST_SEEN_RE.search(title):
             (lon1, lat1), (lon2, lat2) = geom["coordinates"][0][:2], geom["coordinates"][-1][:2]
-            bearing = _bearing_deg(lon1, lat1, lon2, lat2)
+            bearing = {"deg": _bearing_deg(lon1, lat1, lon2, lat2),
+                       "t_ms": _feat_time_ms(props)}
     return searched, last_seen, bearing
 
 
@@ -130,8 +131,6 @@ def load_case(path):
 
     last_seen = dict(imp_last_seen or {})
     last_seen.update(case.get("last_seen", {}))       # explicit wins
-    if last_seen.get("bearing_deg") is None and imp_bearing is not None:
-        last_seen["bearing_deg"] = imp_bearing
     lost_since = case.get("lost_since")   # ISO datetime of escape/last sighting
 
     # A CONFIRMED sighting newer than lost_since supersedes everything: it IS
@@ -150,6 +149,28 @@ def load_case(path):
               % (s["lat"], s["lon"], s["title"]))
     if "lat" not in last_seen:
         raise ValueError("case needs a last_seen (explicit or in the import)")
+
+    # An imported bearing line only applies if drawn at/after the last
+    # sighting — an older line describes a flight the newer sighting
+    # supersedes. An explicit case-file bearing_deg always wins.
+    if last_seen.get("bearing_deg") is None and imp_bearing is not None:
+        t0 = _lost_since_ms(lost_since) if lost_since else 0
+        if not imp_bearing.get("t_ms") or imp_bearing["t_ms"] >= t0:
+            last_seen["bearing_deg"] = imp_bearing["deg"]
+
+    # Visits made before the last sighting say nothing about where the dog
+    # is NOW (the probability field restarts at the sighting) — keep them in
+    # the log for the record, but exclude them from the effort discount.
+    if lost_since:
+        t0 = _lost_since_ms(lost_since)
+        n_stale = 0
+        for s in searched:
+            if s.get("t_ms") and s["t_ms"] <= t0:
+                s["stale"] = True
+                n_stale += 1
+        if n_stale:
+            print("      %d searched visits predate the last sighting -> "
+                  "excluded from effort discount" % n_stale)
 
     ring50_m = None
     if case.get("median_found_mi"):
